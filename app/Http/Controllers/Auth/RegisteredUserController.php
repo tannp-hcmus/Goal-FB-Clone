@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Application\Interfaces\Services\UserServiceInterface;
+use App\Domain\Interfaces\Services\UserServiceInterface;
 
 class RegisteredUserController extends Controller
 {

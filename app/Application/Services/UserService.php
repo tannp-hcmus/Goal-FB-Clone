@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domain\Services;
+namespace App\Application\Services;
 
-use App\Application\Interfaces\Repositories\UserRepositoryInterface;
+use App\Domain\Interfaces\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Models\User;
-use App\Application\Interfaces\Services\UserServiceInterface;
+use App\Domain\Interfaces\Services\UserServiceInterface;
 use Illuminate\Auth\Events\Registered;
 
 class UserService implements UserServiceInterface

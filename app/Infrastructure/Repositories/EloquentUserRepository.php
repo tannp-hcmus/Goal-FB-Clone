@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Repositories;
 
-use App\Application\Interfaces\Repositories\UserRepositoryInterface;
+use App\Domain\Interfaces\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Models\User;
 use App\Application\DTOs\UserDTO;
 use App\Domain\Entities\User as EntitiesUser;

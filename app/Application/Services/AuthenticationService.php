@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Domain\Services;
+namespace App\Application\Services;
 
-use App\Application\Interfaces\Services\AuthenticationServiceInterface;
-use Illuminate\Auth\Events\Lockout;
+use App\Domain\Interfaces\Services\AuthenticationServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;

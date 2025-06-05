@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Application\Interfaces\Services\AuthenticationServiceInterface;
+use App\Domain\Interfaces\Services\AuthenticationServiceInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
