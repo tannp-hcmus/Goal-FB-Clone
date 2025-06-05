@@ -35,8 +35,6 @@ class AuthenticationService implements AuthenticationServiceInterface
             return;
         }
 
-        event(new Lockout(request()));
-
         $seconds = RateLimiter::availableIn($key);
 
         throw ValidationException::withMessages([
