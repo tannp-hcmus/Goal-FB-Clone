@@ -1,0 +1,93 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+---
+description: >
+  Coding rules for a Laravel 12 + Vue.js + Inertia.js project using Clean Architecture principles
+  (adapted for small-scale projects with Services, DTOs, and Middleware structure).
+
+globs:
+  alwaysApply: true
+---
+
+You are an expert in Laravel, Inertia.js, Vue.js, and Clean Architecture with SOLID principles.
+
+## Project Conventions:
+
+- Laravel 12 with PHP 8.2+, Vue.js 3, Vee-Validate v3.
+- Using Inertia.js to render Vue components via Laravel routes.
+- Laravel Mix/Webpack for asset bundling.
+- Vuex for state management if global state needed.
+
+## Clean Architecture Structure (Optimized for Small App):
+
+app/
+├── Domain/
+│ ├── Entities/ # Pure domain models (no Laravel dependencies)
+│ └── Interfaces/ # Repository and Service interfaces
+│
+├── Application/
+│ ├── DTOs/ # Data Transfer Objects (input/output formats)
+│ └── Services/ # Application services containing business logic
+│
+├── Http/
+│ ├── Controllers/ # Responsible for receiving requests and returning Inertia responses
+│ └── Middleware/ # Request modifiers, guards, etc.
+│
+├── Infrastructure/
+│ └── Persistence/
+│ └── Eloquent/ # Repository implementations
+
+## Inertia.js Best Practices:
+
+- Controllers should return `Inertia::render()` instead of traditional Blade views.
+- Vue components for Inertia pages should be placed in `resources/js/Pages/`.
+- Keep each page component focused on a specific purpose (SRP).
+- For form submissions:
+  - Validate using Laravel Form Requests.
+  - Return errors back via `Inertia::render()` or use `Inertia::share()` for shared data like auth user or flash messages.
+- Use `useForm()` in Vue to handle form state, error messages, and validation feedback.
+- Flash messages and user info can be shared using Laravel’s `Inertia::share()` method inside middleware.
+
+## Laravel-Specific Rules:
+
+- Use Form Requests for validation.
+- Use DTOs to pass validated data to Services.
+- Avoid logic in Controllers — delegate to Application Services.
+- Inject interfaces into Services and bind implementations in Service Providers.
+- Use database transactions where needed.
+- Use Eloquent and avoid raw queries unless for performance.
+
+## Vue.js + VeeValidate:
+
+- Validate inputs with Vee-Validate v3.
+- Group common components under `resources/js/Components/`.
+- Use modular Vuex if state is shared across multiple components/pages.
+- Use `<script setup>` or `defineComponent()` to maintain consistency.
+
+## Middleware Guidelines:
+
+- All custom middleware goes in `app/Http/Middleware/`.
+- Use `Inertia::share()` in middleware to provide:
+  - Authenticated user
+  - Flash messages
+  - Locale settings
+- Keep middleware composable and simple.
+
+## Naming Conventions:
+
+- Pages: `resources/js/Pages/Profile/Edit.vue`
+- Components: `resources/js/Components/AvatarUploader.vue`
+- DTOs: `app/Application/DTOs/UpdateUserProfileDTO.php`
+- Services: `app/Application/Services/UserProfileService.php`
+
+## Testing:
+
+- Feature test Inertia controllers using HTTP assertions and Inertia-specific helpers.
+- Unit test Services and Repositories independently using mocks.
+
+## Artisan Workflow (optional via stubs):
+
+- `make:service`, `make:dto`, `make:interface`, `make:repository`, `make:inertia-page` can be created via custom stubs for fast scaffolding.
