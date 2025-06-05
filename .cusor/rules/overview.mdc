@@ -37,8 +37,8 @@ app/
 │ └── Middleware/ # Request modifiers, guards, etc.
 │
 ├── Infrastructure/
-│ └── Persistence/
-│ └── Eloquent/ # Repository implementations
+│ └── Models/
+│ └── Repositories/ # Repository implementations
 
 ## Inertia.js Best Practices:
 
