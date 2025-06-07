@@ -30,4 +30,13 @@ interface UserRepositoryInterface
      * @return UserDTO|null
      */
     public function findByEmail(string $email): ?UserDTO;
+
+    /**
+     * Update a user's profile.
+     *
+     * @param int $id
+     * @param array $data
+     * @return User
+     */
+    public function update(int $id, array $data): User;
 }

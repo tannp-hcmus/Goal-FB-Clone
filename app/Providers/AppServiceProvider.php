@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
             'App\Domain\Interfaces\Services\AuthenticationServiceInterface',
             'App\Application\Services\AuthenticationService'
         );
+        $this->app->bind(
+            'App\Domain\Interfaces\Services\UserProfileServiceInterface',
+            'App\Application\Services\UserProfileService'
+        );
     }
 
     /**

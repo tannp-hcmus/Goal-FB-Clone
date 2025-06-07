@@ -18,8 +18,8 @@ You are an expert in Laravel, Inertia.js, Vue.js, and Clean Architecture with SO
 
 - Laravel 12 with PHP 8.2+, Vue.js 3, Vee-Validate v3.
 - Using Inertia.js to render Vue components via Laravel routes.
-- Laravel Mix/Webpack for asset bundling.
-- Vuex for state management if global state needed.
+- Using Vite for asset bundling and Vue 3 integration.
+- Pinia for state management if global state needed.
 
 ## Clean Architecture Structure (Optimized for Small App):
 
