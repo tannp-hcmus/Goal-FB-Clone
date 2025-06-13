@@ -202,7 +202,7 @@ const closeModal = () => {
                         type="text"
                         class="mt-1 block w-full"
                         v-model="name"
-                        rules="required|max:50"
+                        rules="required"
                         placeholder="Enter your full name"
                         autofocus
                     />
