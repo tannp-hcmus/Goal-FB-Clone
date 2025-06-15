@@ -2,6 +2,7 @@
 
 namespace App\Application\Services;
 
+use App\Application\DTOs\LoginDTO;
 use App\Domain\Interfaces\Services\AuthenticationServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,13 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 class AuthenticationService implements AuthenticationServiceInterface
 {
-    public function authenticate(string $email, string $password, bool $remember = false): void
+    public function authenticate(LoginDTO $dto): void
     {
-        $key = $this->generateThrottleKey($email, request()->ip());
+        $key = $this->generateThrottleKey($dto->email, request()->ip());
 
         $this->ensureIsNotRateLimited($key);
 
-        if (! Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
+        if (! Auth::attempt(['email' => $dto->email, 'password' => $dto->password], $dto->remember)) {
             RateLimiter::hit($key);
 
             throw ValidationException::withMessages([

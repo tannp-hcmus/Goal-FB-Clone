@@ -2,6 +2,7 @@
 
 namespace App\Application\Services;
 
+use App\Application\DTOs\RegisterUserDTO;
 use App\Domain\Interfaces\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Models\User;
 use App\Domain\Interfaces\Services\UserServiceInterface;
@@ -13,9 +14,9 @@ class UserService implements UserServiceInterface
         private UserRepositoryInterface $userRepository,
     ) {}
 
-    public function create(array $data): User
+    public function create(RegisterUserDTO $dto): User
     {
-        $user = $this->userRepository->create($data);
+        $user = $this->userRepository->create($dto->toArray());
         event(new Registered($user));
 
         return $user;
