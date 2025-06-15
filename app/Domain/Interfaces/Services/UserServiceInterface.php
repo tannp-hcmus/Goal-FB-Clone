@@ -2,6 +2,7 @@
 
 namespace App\Domain\Interfaces\Services;
 
+use App\Application\DTOs\RegisterUserDTO;
 use App\Infrastructure\Models\User;
 
 interface UserServiceInterface
@@ -9,8 +10,8 @@ interface UserServiceInterface
     /**
      * Create a new user.
      *
-     * @param array $data
+     * @param RegisterUserDTO $dto
      * @return User
      */
-    public function create(array $data): User;
+    public function create(RegisterUserDTO $dto): User;
 }

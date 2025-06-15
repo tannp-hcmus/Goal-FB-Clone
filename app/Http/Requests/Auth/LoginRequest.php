@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Application\DTOs\LoginDTO;
 use App\Domain\Interfaces\Services\AuthenticationServiceInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -38,6 +39,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'remember' => ['boolean'],
         ];
     }
 
@@ -48,10 +50,13 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        $this->authenticationService->authenticate(
-            $this->string('email'),
-            $this->string('password'),
-            $this->boolean('remember')
-        );
+        $validated = $this->validated();
+        $dto = LoginDTO::fromArray([
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'remember' => $validated['remember'] ?? false,
+        ]);
+
+        $this->authenticationService->authenticate($dto);
     }
 }
