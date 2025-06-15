@@ -2,10 +2,11 @@
     "compilerOptions": {
         "allowJs": true,
         "module": "ESNext",
-        "moduleResolution": "bundler",
+        "moduleResolution": "node",
         "jsx": "preserve",
         "strict": true,
         "isolatedModules": true,
+        "verbatimModuleSyntax": true,
         "target": "ESNext",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
