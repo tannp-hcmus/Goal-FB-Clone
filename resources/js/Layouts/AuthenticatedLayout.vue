@@ -74,7 +74,7 @@ const page = usePage();
 
                                     <template #content>
                                         <DropdownLink
-                                            href="#"
+                                            :href="route('profile.show')"
                                         >
                                             Profile
                                         </DropdownLink>
@@ -166,7 +166,7 @@ const page = usePage();
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink href="#">
+                            <ResponsiveNavLink :href="route('profile.show')">
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink

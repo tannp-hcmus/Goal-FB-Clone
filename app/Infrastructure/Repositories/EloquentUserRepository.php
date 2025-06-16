@@ -49,6 +49,36 @@ class EloquentUserRepository implements UserRepositoryInterface
         ]);
     }
 
+    public function update(int $id, array $data): User
+    {
+        $user = User::findOrFail($id);
+
+        $updateData = array_filter($data, function($value) {
+            return $value !== null;
+        });
+
+        $user->update($updateData);
+
+        return $user->fresh();
+    }
+
+    public function findModelById(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
+    public function updateProfile(User $user, array $data): User
+    {
+        $updateData = array_filter($data, function($value) {
+            return $value !== null;
+        });
+
+        $user->fill($updateData);
+        $user->save();
+
+        return $user->fresh();
+    }
+
     private function mapToUser($data): UserDTO
     {
         $user = new EntitiesUser(
