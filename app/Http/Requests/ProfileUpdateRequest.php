@@ -26,7 +26,17 @@ class ProfileUpdateRequest extends FormRequest
         $userId = Auth::id();
 
         return [
-            'name' => ['required', 'string', 'max:50'],
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^[\pL\s\-\'\.]+$/u',
+                function ($attribute, $value, $fail) {
+                    if (trim($value) === '') {
+                        $fail('The name field cannot be empty or just whitespace.');
+                    }
+                }
+            ],
             'email' => ['required', 'email', Rule::unique('users')->ignore($userId)],
             'description' => ['nullable', 'string', 'max:255'],
             'avatar' => ['nullable', 'image', 'max:2048'], // max 2MB
@@ -43,6 +53,7 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name.required' => 'The name field is required.',
             'name.max' => 'The name may not be greater than 50 characters.',
+            'name.regex' => 'The name may only contain letters, spaces, hyphens, apostrophes, and periods.',
             'email.required' => 'The email field is required.',
             'email.email' => 'The email must be a valid email address.',
             'email.unique' => 'The email has already been taken.',

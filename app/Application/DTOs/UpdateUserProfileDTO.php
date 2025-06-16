@@ -10,6 +10,7 @@ class UpdateUserProfileDTO
         public ?string $description = null,
         public ?string $avatar = null,
     ) {
+        $this->validateName($name);
     }
 
     public function toArray(): array
@@ -23,15 +24,33 @@ class UpdateUserProfileDTO
         ];
     }
 
+    private function validateName(string $name): void
+    {
+        if (empty(trim($name))) {
+            throw new \InvalidArgumentException('Name cannot be empty');
+        }
+    }
+
     private function getFirstName(): string
     {
-        $nameParts = explode(' ', $this->name, 2);
-        return $nameParts[0];
+        $nameParts = $this->parseNameParts();
+        return $nameParts['firstname'];
     }
 
     private function getLastName(): string
     {
-        $nameParts = explode(' ', $this->name, 2);
-        return isset($nameParts[1]) ? $nameParts[1] : '';
+        $nameParts = $this->parseNameParts();
+        return $nameParts['lastname'];
+    }
+
+    private function parseNameParts(): array
+    {
+        $trimmedName = trim($this->name);
+        $nameParts = explode(' ', $trimmedName, 2);
+
+        return [
+            'firstname' => $nameParts[0],
+            'lastname' => isset($nameParts[1]) ? trim($nameParts[1]) : '',
+        ];
     }
 }

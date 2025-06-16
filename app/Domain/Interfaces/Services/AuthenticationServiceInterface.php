@@ -2,6 +2,7 @@
 
 namespace App\Domain\Interfaces\Services;
 
+use App\Application\DTOs\LoginDTO;
 use Illuminate\Http\Request;
 
 interface AuthenticationServiceInterface
@@ -9,12 +10,10 @@ interface AuthenticationServiceInterface
     /**
      * Attempt to authenticate a user with the given credentials.
      *
-     * @param string $email
-     * @param string $password
-     * @param bool $remember
+     * @param LoginDTO $dto
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(string $email, string $password, bool $remember = false): void;
+    public function authenticate(LoginDTO $dto): void;
 
     /**
      * Check if the authentication attempts are rate limited.

@@ -29,8 +29,12 @@ class AppServiceProvider extends ServiceProvider
             'App\Application\Services\UserProfileService'
         );
         $this->app->bind(
-            'App\Domain\Interfaces\PostRepositoryInterface',
+            'App\Domain\Interfaces\Repositories\PostRepositoryInterface',
             'App\Infrastructure\Repositories\EloquentPostRepository'
+        );
+        $this->app->bind(
+            'App\Domain\Interfaces\Services\FileStorageServiceInterface',
+            'App\Application\Services\FileStorageService'
         );
     }
 
