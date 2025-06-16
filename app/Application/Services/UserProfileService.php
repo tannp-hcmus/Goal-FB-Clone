@@ -5,57 +5,54 @@ namespace App\Application\Services;
 use App\Application\DTOs\UpdateUserProfileDTO;
 use App\Domain\Interfaces\Repositories\UserRepositoryInterface;
 use App\Domain\Interfaces\Services\UserProfileServiceInterface;
+use App\Domain\Interfaces\Services\FileStorageServiceInterface;
 use App\Infrastructure\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class UserProfileService implements UserProfileServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
+        private FileStorageServiceInterface $fileStorageService,
     ) {}
 
     public function updateProfile(int $userId, UpdateUserProfileDTO $dto, $avatarFile = null): array
     {
-        $user = User::findOrFail($userId);
-        $data = $dto->toArray();
+        return DB::transaction(function () use ($userId, $dto, $avatarFile) {
+            $user = $this->userRepository->findModelById($userId);
+            $data = $dto->toArray();
 
-        // Remove avatar from data array - we'll handle it separately
-        unset($data['avatar']);
+            unset($data['avatar']);
 
-        // Handle avatar upload
-        if ($avatarFile instanceof UploadedFile) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
+            if ($avatarFile instanceof UploadedFile) {
+                if ($user->avatar) {
+                    $this->fileStorageService->deleteAvatar($user->avatar);
+                }
+
+                // Store new avatar
+                $data['avatar'] = $this->fileStorageService->storeAvatar($avatarFile);
             }
 
-            $avatarPath = $avatarFile->store('avatars', 'public');
-            $data['avatar'] = Storage::url($avatarPath);
-        }
+            $user->fill($data);
 
-        // Fill the user model with new data but don't save yet
-        $user->fill($data);
+            $emailVerificationNeeded = $user->isDirty('email');
 
-        // Check if email changed using Laravel's isDirty method
-        $emailVerificationNeeded = $user->isDirty('email');
+            if ($emailVerificationNeeded) {
+                $user->email_verified_at = null;
+            }
 
-        // If email changed, mark as unverified
-        if ($emailVerificationNeeded) {
-            $user->email_verified_at = null;
-        }
+            $updatedUser = $this->userRepository->updateProfile($user, $data);
 
-        // Save the user
-        $user->save();
+            if ($emailVerificationNeeded) {
+                $updatedUser->sendEmailVerificationNotification();
+            }
 
-        // Send verification email if needed
-        if ($emailVerificationNeeded) {
-            $user->sendEmailVerificationNotification();
-        }
-
-        return [
-            'user' => $user,
-            'email_verification_needed' => $emailVerificationNeeded,
-        ];
+            return [
+                'user' => $updatedUser,
+                'email_verification_needed' => $emailVerificationNeeded,
+            ];
+        });
     }
 }
 

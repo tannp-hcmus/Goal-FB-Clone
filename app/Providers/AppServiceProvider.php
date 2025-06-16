@@ -28,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
             'App\Domain\Interfaces\Services\UserProfileServiceInterface',
             'App\Application\Services\UserProfileService'
         );
+        $this->app->bind(
+            'App\Domain\Interfaces\Services\FileStorageServiceInterface',
+            'App\Application\Services\FileStorageService'
+        );
     }
 
     /**
