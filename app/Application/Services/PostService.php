@@ -5,7 +5,7 @@ namespace App\Application\Services;
 use App\Application\DTOs\CreatePostDTO;
 use App\Application\DTOs\UpdatePostDTO;
 use App\Domain\Entities\Post;
-use App\Domain\Interfaces\PostRepositoryInterface;
+use App\Domain\Interfaces\Repositories\PostRepositoryInterface;
 
 class PostService
 {
@@ -86,20 +86,8 @@ class PostService
      * @param int $userId
      * @return Post|null
      */
-    public function getPostForEdit(int $id, int $userId): ?Post
+    public function getPostForEditing(int $id, int $userId): ?Post
     {
         return $this->postRepository->findByIdAndUserId($id, $userId);
-    }
-
-    /**
-     * Toggle like on a post
-     *
-     * @param int $postId
-     * @param int $userId
-     * @return bool
-     */
-    public function toggleLike(int $postId, int $userId): bool
-    {
-        return $this->postRepository->toggleLike($postId, $userId);
     }
 }

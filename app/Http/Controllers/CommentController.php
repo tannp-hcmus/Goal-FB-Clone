@@ -29,8 +29,7 @@ class CommentController extends Controller
 
         $this->commentService->addComment($dto);
 
-        return redirect()->route('posts.index')
-            ->with('success', 'Comment added successfully!');
+        return back()->with('success', 'Comment added successfully!');
     }
 
     /**
@@ -41,11 +40,9 @@ class CommentController extends Controller
         $deleted = $this->commentService->deleteComment($commentId, Auth::id());
 
         if (!$deleted) {
-            return redirect()->route('posts.index')
-                ->with('error', 'Comment not found or you do not have permission to delete it.');
+            return back()->with('error', 'Comment not found or you do not have permission to delete it.');
         }
 
-        return redirect()->route('posts.index')
-            ->with('success', 'Comment deleted successfully!');
+        return back()->with('success', 'Comment deleted successfully!');
     }
 }

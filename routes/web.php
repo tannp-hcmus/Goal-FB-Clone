@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -31,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     // Like routes
-    Route::post('/posts/{id}/like', [PostController::class, 'toggleLike'])->name('posts.like');
+    Route::post('/posts/{postId}/like', [LikeController::class, 'toggle'])->name('posts.like');
 
     // Comment routes
     Route::post('/posts/{postId}/comments', [CommentController::class, 'store'])->name('posts.comments.store');

@@ -52,6 +52,14 @@
     defineProps<Props>();
     const page = usePage();
 
+    // Form refs for manual reset
+    const createFormRef = ref();
+    const editFormRef = ref();
+
+    // Reactive keys to force form re-rendering when reset
+    const createFormKey = ref(0);
+    const editFormKey = ref(0);
+
     // Create form
     const createForm = useForm({
         title: '',
@@ -98,6 +106,12 @@
         createForm.post(route('posts.store'), {
             onSuccess: () => {
                 createForm.reset();
+                createForm.clearErrors();
+                // Reset VeeValidate form and force re-render
+                if (createFormRef.value) {
+                    createFormRef.value.resetForm();
+                }
+                createFormKey.value++;
                 showToastMessage('Post created successfully!', 'success');
             },
             onError: () => {
@@ -121,6 +135,12 @@
                 showEditModal.value = false;
                 editingPost.value = null;
                 editForm.reset();
+                editForm.clearErrors();
+                // Reset VeeValidate form and force re-render
+                if (editFormRef.value) {
+                    editFormRef.value.resetForm();
+                }
+                editFormKey.value++;
                 showToastMessage('Post updated successfully!', 'success');
             },
             onError: () => {
@@ -151,6 +171,8 @@
 
     function toggleLike(postId: number) {
         useForm({}).post(route('posts.like', postId), {
+            preserveScroll: true,
+            preserveState: true,
             onError: () => {
                 showToastMessage('Failed to update like.', 'error');
             },
@@ -165,6 +187,12 @@
         showEditModal.value = false;
         editingPost.value = null;
         editForm.reset();
+        editForm.clearErrors();
+        // Reset VeeValidate form and force re-render
+        if (editFormRef.value) {
+            editFormRef.value.resetForm();
+        }
+        editFormKey.value++;
     }
 
     function closeDeleteModal() {
@@ -197,11 +225,11 @@
         </template>
 
         <div class="py-8">
-            <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <!-- Create Post Form -->
                 <div class="mb-8 overflow-hidden bg-white shadow-lg sm:rounded-xl border border-gray-200">
                     <div class="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                        <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex items-center space-x-4 mb-6">
                             <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                                 {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
                             </div>
@@ -211,38 +239,41 @@
                             </div>
                         </div>
 
-                        <VeeForm @submit="createPost" class="space-y-4">
-                            <div>
-                                <FieldInput
-                                    name="title"
-                                    rules="required"
-                                    v-model="createForm.title"
-                                    placeholder="What's this about?"
-                                    :maxlength="100"
-                                    class="text-lg"
-                                />
+                        <VeeForm ref="createFormRef" @submit="createPost" class="space-y-6" :key="`create-post-${createFormKey}`">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-2">
+                                    <FieldInput
+                                        name="create_post_title"
+                                        rules="required"
+                                        v-model="createForm.title"
+                                        placeholder="What's this about?"
+                                        :maxlength="100"
+                                        class="text-lg"
+                                        :validation-label="'Title'"
+                                    />
+                                </div>
+                                <div class="flex items-end">
+                                    <PrimaryButton
+                                        type="submit"
+                                        :disabled="createForm.processing"
+                                        class="w-full lg:w-auto px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                                    >
+                                        {{ createForm.processing ? 'Posting...' : 'Share Post' }}
+                                    </PrimaryButton>
+                                </div>
                             </div>
 
                             <div>
                                 <TextareaInput
-                                    name="content"
+                                    name="create_post_content"
                                     rules="required"
                                     v-model="createForm.content"
                                     placeholder="Share your thoughts..."
                                     :maxlength="1000"
                                     :rows="4"
                                     class="text-base"
+                                    :validation-label="'Content'"
                                 />
-                            </div>
-
-                            <div class="flex justify-end">
-                                <PrimaryButton
-                                    type="submit"
-                                    :disabled="createForm.processing"
-                                    class="px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                                >
-                                    {{ createForm.processing ? 'Posting...' : 'Share Post' }}
-                                </PrimaryButton>
                             </div>
                         </VeeForm>
                     </div>
@@ -349,17 +380,18 @@
             <div class="p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Post</h3>
 
-                <VeeForm @submit="updatePost" class="space-y-4">
+                <VeeForm ref="editFormRef" @submit="updatePost" class="space-y-4" :key="`edit-post-${editFormKey}`">
                     <div>
                         <label for="edit_title" class="block text-sm font-medium text-gray-700 mb-1">
                             Title
                         </label>
                         <FieldInput
-                            name="edit_title"
+                            name="edit_post_title"
                             rules="required"
                             v-model="editForm.title"
                             placeholder="Enter post title..."
                             :maxlength="100"
+                            :validation-label="'Title'"
                         />
                     </div>
 
@@ -368,11 +400,12 @@
                             Content
                         </label>
                         <TextareaInput
-                            name="edit_content"
+                            name="edit_post_content"
                             rules="required"
                             v-model="editForm.content"
                             placeholder="Write your post content..."
                             :maxlength="1000"
+                            :validation-label="'Content'"
                         />
                     </div>
 

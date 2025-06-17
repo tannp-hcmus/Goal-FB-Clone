@@ -3,11 +3,8 @@
 namespace App\Infrastructure\Repositories;
 
 use App\Domain\Entities\Post as PostEntity;
-use App\Domain\Entities\Comment as CommentEntity;
-use App\Domain\Interfaces\PostRepositoryInterface;
+use App\Domain\Interfaces\Repositories\PostRepositoryInterface;
 use App\Infrastructure\Models\Post;
-use App\Infrastructure\Models\Like;
-use App\Infrastructure\Models\Comment;
 
 class EloquentPostRepository implements PostRepositoryInterface
 {
@@ -131,66 +128,6 @@ class EloquentPostRepository implements PostRepositoryInterface
     public function delete(int $id, int $userId): bool
     {
         return Post::where('id', $id)
-            ->where('user_id', $userId)
-            ->delete() > 0;
-    }
-
-    /**
-     * Toggle like on a post
-     *
-     * @param int $postId
-     * @param int $userId
-     * @return bool True if liked, false if unliked
-     */
-    public function toggleLike(int $postId, int $userId): bool
-    {
-        $like = Like::where('post_id', $postId)
-            ->where('user_id', $userId)
-            ->first();
-
-        if ($like) {
-            $like->delete();
-            return false; // unliked
-        } else {
-            Like::create([
-                'post_id' => $postId,
-                'user_id' => $userId,
-            ]);
-            return true; // liked
-        }
-    }
-
-    /**
-     * Add a comment to a post
-     *
-     * @param int $postId
-     * @param string $content
-     * @param int $userId
-     * @param int|null $parentCommentId
-     * @return CommentEntity
-     */
-    public function addComment(int $postId, string $content, int $userId, ?int $parentCommentId = null): CommentEntity
-    {
-        $comment = Comment::create([
-            'content' => $content,
-            'post_id' => $postId,
-            'user_id' => $userId,
-            'parent_comment_id' => $parentCommentId,
-        ]);
-
-        return $comment->load('user')->toDomainEntity();
-    }
-
-    /**
-     * Delete a comment (only by owner)
-     *
-     * @param int $commentId
-     * @param int $userId
-     * @return bool
-     */
-    public function deleteComment(int $commentId, int $userId): bool
-    {
-        return Comment::where('id', $commentId)
             ->where('user_id', $userId)
             ->delete() > 0;
     }

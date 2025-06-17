@@ -33,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
             'App\Infrastructure\Repositories\EloquentPostRepository'
         );
         $this->app->bind(
+            'App\Domain\Interfaces\Repositories\CommentRepositoryInterface',
+            'App\Infrastructure\Repositories\EloquentCommentRepository'
+        );
+        $this->app->bind(
+            'App\Domain\Interfaces\Repositories\LikeRepositoryInterface',
+            'App\Infrastructure\Repositories\EloquentLikeRepository'
+        );
+        $this->app->bind(
             'App\Domain\Interfaces\Services\FileStorageServiceInterface',
             'App\Application\Services\FileStorageService'
         );

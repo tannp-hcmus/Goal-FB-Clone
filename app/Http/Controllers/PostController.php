@@ -97,17 +97,4 @@ class PostController extends Controller
         return redirect()->route('posts.index')
             ->with('success', 'Post deleted successfully!');
     }
-
-    /**
-     * Toggle like on a post
-     */
-    public function toggleLike(int $id): RedirectResponse
-    {
-        $isLiked = $this->postService->toggleLike($id, Auth::id());
-
-        $message = $isLiked ? 'Post liked!' : 'Post unliked!';
-
-        return redirect()->route('posts.index')
-            ->with('success', $message);
-    }
 }

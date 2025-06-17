@@ -4,12 +4,12 @@ namespace App\Application\Services;
 
 use App\Application\DTOs\CreateCommentDTO;
 use App\Domain\Entities\Comment;
-use App\Domain\Interfaces\PostRepositoryInterface;
+use App\Domain\Interfaces\Repositories\CommentRepositoryInterface;
 
 class CommentService
 {
     public function __construct(
-        private readonly PostRepositoryInterface $postRepository
+        private readonly CommentRepositoryInterface $commentRepository
     ) {}
 
     /**
@@ -20,7 +20,7 @@ class CommentService
      */
     public function addComment(CreateCommentDTO $dto): Comment
     {
-        return $this->postRepository->addComment(
+        return $this->commentRepository->create(
             $dto->postId,
             $dto->content,
             $dto->userId,
@@ -37,6 +37,6 @@ class CommentService
      */
     public function deleteComment(int $commentId, int $userId): bool
     {
-        return $this->postRepository->deleteComment($commentId, $userId);
+        return $this->commentRepository->delete($commentId, $userId);
     }
 }

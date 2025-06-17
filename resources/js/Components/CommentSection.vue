@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import type { InertiaForm } from '@inertiajs/vue3';
 import TextareaInput from '@/Components/TextareaInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -31,31 +32,61 @@ interface Props {
     showComments: boolean;
 }
 
+type ReplyFormData = {
+    content: string;
+    parent_comment_id: number;
+};
+
 const props = defineProps<Props>();
 const emit = defineEmits(['toggle-comments', 'show-toast']);
 const page = usePage();
 
-// Comment forms - one per comment for replies
-const commentForms = reactive<Record<number, any>>({});
+// Form refs for manual reset
+const mainCommentFormRef = ref();
+const replyFormRefs = ref<Record<number, any>>({});
+
+// Main comment form
 const mainCommentForm = useForm({ content: '' });
 
-// State for showing reply forms
-const showReplyForm = reactive<Record<number, boolean>>({});
+// Reply forms - using ref with proper typing
+const replyForms = ref<Record<number, InertiaForm<ReplyFormData>>>({});
 
-function getCommentForm(commentId: number) {
-    if (!commentForms[commentId]) {
-        commentForms[commentId] = useForm({
+// State for showing reply forms
+const showReplyForm = ref<Record<number, boolean>>({});
+
+// Reactive keys to force form re-rendering when reset
+const mainFormKey = ref(0);
+const replyFormKeys = ref<Record<number, number>>({});
+
+function getReplyForm(commentId: number): InertiaForm<ReplyFormData> {
+    if (!replyForms.value[commentId]) {
+        replyForms.value[commentId] = useForm({
             content: '',
             parent_comment_id: commentId,
         });
     }
-    return commentForms[commentId];
+    return replyForms.value[commentId];
+}
+
+function getReplyFormKey(commentId: number): number {
+    if (replyFormKeys.value[commentId] === undefined) {
+        replyFormKeys.value[commentId] = 0;
+    }
+    return replyFormKeys.value[commentId];
 }
 
 function addMainComment() {
     mainCommentForm.post(route('posts.comments.store', props.postId), {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             mainCommentForm.reset();
+            mainCommentForm.clearErrors();
+            // Reset VeeValidate form and force re-render
+            if (mainCommentFormRef.value) {
+                mainCommentFormRef.value.resetForm();
+            }
+            mainFormKey.value++;
             emit('show-toast', 'Comment added successfully!', 'success');
         },
         onError: () => {
@@ -65,12 +96,20 @@ function addMainComment() {
 }
 
 function addReply(parentCommentId: number) {
-    const form = getCommentForm(parentCommentId);
+    const form = getReplyForm(parentCommentId);
 
     form.post(route('posts.comments.store', props.postId), {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             form.reset();
-            showReplyForm[parentCommentId] = false;
+            form.clearErrors();
+            showReplyForm.value[parentCommentId] = false;
+            // Reset VeeValidate form and force re-render
+            if (replyFormRefs.value[parentCommentId]) {
+                replyFormRefs.value[parentCommentId].resetForm();
+            }
+            replyFormKeys.value[parentCommentId] = (replyFormKeys.value[parentCommentId] || 0) + 1;
             emit('show-toast', 'Reply added successfully!', 'success');
         },
         onError: () => {
@@ -81,6 +120,8 @@ function addReply(parentCommentId: number) {
 
 function deleteComment(commentId: number) {
     useForm({}).delete(route('comments.destroy', commentId), {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
             emit('show-toast', 'Comment deleted successfully!', 'success');
         },
@@ -91,15 +132,29 @@ function deleteComment(commentId: number) {
 }
 
 function toggleReplyForm(commentId: number) {
-    showReplyForm[commentId] = !showReplyForm[commentId];
+    showReplyForm.value[commentId] = !showReplyForm.value[commentId];
     // Reset form when closing
-    if (!showReplyForm[commentId] && commentForms[commentId]) {
-        commentForms[commentId].reset();
+    if (!showReplyForm.value[commentId] && replyForms.value[commentId]) {
+        replyForms.value[commentId].reset();
+        replyForms.value[commentId].clearErrors();
+        if (replyFormRefs.value[commentId]) {
+            replyFormRefs.value[commentId].resetForm();
+        }
+        replyFormKeys.value[commentId] = (replyFormKeys.value[commentId] || 0) + 1;
     }
 }
 
 function toggleComments() {
     emit('toggle-comments');
+}
+
+// Helper functions for template
+function isReplyFormShown(commentId: number): boolean {
+    return showReplyForm.value[commentId] || false;
+}
+
+function isReplyFormProcessing(commentId: number): boolean {
+    return getReplyForm(commentId).processing;
 }
 </script>
 
@@ -144,14 +199,15 @@ function toggleComments() {
                         {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
                     </div>
                     <div class="flex-1">
-                        <VeeForm @submit="addMainComment" class="space-y-4">
+                        <VeeForm ref="mainCommentFormRef" @submit="addMainComment" class="space-y-4" :key="`main-comment-${props.postId}-${mainFormKey}`">
                             <TextareaInput
-                                name="main_comment"
+                                :name="`main_comment_${props.postId}`"
                                 rules="required"
                                 v-model="mainCommentForm.content"
                                 placeholder="What do you think about this post?"
-                                :rows="3"
+                                :rows="1"
                                 class="resize-none"
+                                :validation-label="'Comment'"
                             />
                             <div class="flex justify-end">
                                 <PrimaryButton
@@ -207,7 +263,7 @@ function toggleComments() {
                                     @click="toggleReplyForm(comment.id)"
                                     :class="[
                                         'flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 transform hover:scale-105',
-                                        showReplyForm[comment.id]
+                                        isReplyFormShown(comment.id)
                                             ? 'text-blue-600 bg-blue-100 hover:bg-blue-200'
                                             : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
                                     ]"
@@ -215,7 +271,7 @@ function toggleComments() {
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                     </svg>
-                                    <span>{{ showReplyForm[comment.id] ? 'Cancel Reply' : 'Reply' }}</span>
+                                    <span>{{ isReplyFormShown(comment.id) ? 'Cancel Reply' : 'Reply' }}</span>
                                 </button>
 
                                 <div v-if="comment.replies.length > 0" class="flex items-center space-x-2 text-xs text-gray-500">
@@ -227,20 +283,21 @@ function toggleComments() {
                             </div>
 
                             <!-- Reply Form -->
-                            <div v-if="showReplyForm[comment.id]" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-400 shadow-sm">
+                            <div v-if="isReplyFormShown(comment.id)" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-400 shadow-sm">
                                 <div class="flex space-x-3">
                                     <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md flex-shrink-0">
                                         {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
                                     </div>
                                     <div class="flex-1">
-                                        <VeeForm @submit="() => addReply(comment.id)" class="space-y-4">
+                                        <VeeForm :ref="(el) => replyFormRefs[comment.id] = el" @submit="() => addReply(comment.id)" class="space-y-4" :key="`reply-form-${comment.id}-${getReplyFormKey(comment.id)}`">
                                             <TextareaInput
-                                                :name="`reply_${comment.id}`"
+                                                :name="`reply_comment_${comment.id}`"
                                                 rules="required"
-                                                v-model="getCommentForm(comment.id).content"
+                                                v-model="getReplyForm(comment.id).content"
                                                 :placeholder="`Reply to ${comment.author_name}...`"
-                                                :rows="3"
+                                                :rows="1"
                                                 class="resize-none"
+                                                :validation-label="'Reply'"
                                             />
                                             <div class="flex justify-end space-x-3">
                                                 <SecondaryButton
@@ -252,10 +309,10 @@ function toggleComments() {
                                                 </SecondaryButton>
                                                 <PrimaryButton
                                                     type="submit"
-                                                    :disabled="getCommentForm(comment.id).processing"
+                                                    :disabled="isReplyFormProcessing(comment.id)"
                                                     class="px-4 py-2 text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                                                 >
-                                                    {{ getCommentForm(comment.id).processing ? 'Replying...' : 'Post Reply' }}
+                                                    {{ isReplyFormProcessing(comment.id) ? 'Replying...' : 'Post Reply' }}
                                                 </PrimaryButton>
                                             </div>
                                         </VeeForm>
