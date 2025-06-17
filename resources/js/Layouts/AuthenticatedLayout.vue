@@ -41,6 +41,12 @@ const page = usePage();
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('posts.index')"
+                                    :active="route().current('posts.*')"
+                                >
+                                    Posts
+                                </NavLink>
                             </div>
                         </div>
 
@@ -147,6 +153,12 @@ const page = usePage();
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('posts.index')"
+                            :active="route().current('posts.*')"
+                        >
+                            Posts
                         </ResponsiveNavLink>
                     </div>
 

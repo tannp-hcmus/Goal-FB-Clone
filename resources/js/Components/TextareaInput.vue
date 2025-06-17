@@ -1,40 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref, toRef, watch } from 'vue';
+import { toRef, watch } from 'vue';
 import { Field, useField, defineRule } from 'vee-validate';
 import InputError from './InputError.vue';
-import { required, numeric, digits, min, email } from '@vee-validate/rules';
+import { required } from '@vee-validate/rules';
 
-const input = ref<HTMLInputElement | null>(null);
-
-onMounted(() => {
-    if (input.value?.hasAttribute('autofocus')) {
-        input.value?.focus();
-    }
-});
-
-defineExpose({ focus: () => input.value?.focus() });
 defineRule('required', required);
-defineRule('numeric', numeric);
-defineRule('digits', digits);
-defineRule('min', min);
-defineRule('email', email);
 
-interface FieldInputProps {
-    type?: string;
+interface TextareaInputProps {
     name: string;
     placeholder?: string;
     maxlength?: number;
-    inputmode?: 'email' | 'numeric' | 'url' | 'tel' | 'text' | 'search' | 'none' | 'decimal';
-    modelValue: string | number;
+    rows?: number;
+    modelValue: string;
     rules?: string | Record<string, unknown>;
     validationLabel?: string;
 }
 
-const props = withDefaults(defineProps<FieldInputProps>(), {
-    type: 'text',
+const props = withDefaults(defineProps<TextareaInputProps>(), {
     placeholder: undefined,
     maxlength: undefined,
-    inputmode: undefined,
+    rows: 4,
     rules: undefined,
     validationLabel: undefined
 });
@@ -42,7 +27,7 @@ const props = withDefaults(defineProps<FieldInputProps>(), {
 const emit = defineEmits(['update:modelValue']);
 
 function emitValue(event: Event): void {
-    const target = event.target as HTMLInputElement;
+    const target = event.target as HTMLTextAreaElement;
     emit('update:modelValue', target.value);
 }
 
@@ -58,6 +43,7 @@ const modelValue = toRef(props, 'modelValue');
 
 watch(modelValue, (newValue) => {
     inputValue.value = newValue;
+    // If the new value is empty, reset the field validation state
     if (!newValue && resetField) {
         try {
             resetField();
@@ -87,17 +73,24 @@ const getErrorMessage = (originalMessage: string): string => {
 </script>
 
 <template>
-    <Field v-slot="{ errors, field }" :name="name" :rules="rules" :validate-on-blur="true" :validate-on-change="false" :validate-on-input="false" :key="name">
-        <input
+    <Field
+        v-slot="{ errors, field }"
+        :name="name"
+        :rules="rules"
+        :validate-on-blur="true"
+        :validate-on-change="false"
+        :validate-on-input="false"
+        :key="name"
+    >
+        <textarea
             :class="[
                 'w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
                 errors.length > 0 ? 'border-red-500' : '',
             ]"
             v-bind="{ ...$attrs, ...field }"
-            :type="type"
             :placeholder="placeholder"
             :maxlength="maxlength"
-            :inputmode="inputmode"
+            :rows="rows"
             :value="modelValue"
             @input="emitValue"
         />
