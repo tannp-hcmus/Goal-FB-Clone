@@ -179,11 +179,6 @@
     </div>
     </div>
 
-        <!-- Debug Info (remove this later) -->
-    <div class="text-xs text-gray-500 mt-1">
-      Debug: isOpen={{ isOpen }}, hasResults={{ hasResults }}, resultsLength={{ results.length }}, query={{ query }}
-    </div>
-
     <!-- Dropdown Results -->
     <div
       v-if="isOpen"
