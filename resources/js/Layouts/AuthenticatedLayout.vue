@@ -6,6 +6,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import GlobalSearchBar from '@/Components/GlobalSearchBar.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -48,6 +49,11 @@ const page = usePage();
                                     Posts
                                 </NavLink>
                             </div>
+                        </div>
+
+                        <!-- Global Search Bar -->
+                        <div class="hidden sm:flex sm:items-center sm:flex-1 sm:justify-center sm:max-w-xs sm:mx-6">
+                            <GlobalSearchBar />
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
@@ -160,6 +166,13 @@ const page = usePage();
                         >
                             Posts
                         </ResponsiveNavLink>
+                    </div>
+
+                    <!-- Mobile Search Bar -->
+                    <div class="px-4 pb-3 border-t border-gray-200">
+                        <div class="pt-3">
+                            <GlobalSearchBar />
+                        </div>
                     </div>
 
                     <!-- Responsive Settings Options -->

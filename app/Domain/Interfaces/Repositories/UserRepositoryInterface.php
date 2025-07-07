@@ -4,6 +4,7 @@ namespace App\Domain\Interfaces\Repositories;
 
 use App\Application\DTOs\UserDTO;
 use App\Infrastructure\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 interface UserRepositoryInterface
 {
@@ -14,6 +15,13 @@ interface UserRepositoryInterface
      * @return User
      */
     public function create(array $data): User;
+
+    /**
+     * Get all users.
+     *
+     * @return Collection<User>
+     */
+    public function getAll(): Collection;
 
     /**
      * Find a user by their ID.
@@ -57,4 +65,13 @@ interface UserRepositoryInterface
      * @return User
      */
     public function updateProfile(User $user, array $data): User;
+
+    /**
+     * Process all users in chunks for efficient memory usage.
+     *
+     * @param int $count
+     * @param callable $callback
+     * @return void
+     */
+    public function chunkAll(int $count, callable $callback): void;
 }

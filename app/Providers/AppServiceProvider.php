@@ -44,6 +44,14 @@ class AppServiceProvider extends ServiceProvider
             'App\Domain\Interfaces\Services\FileStorageServiceInterface',
             'App\Application\Services\FileStorageService'
         );
+        $this->app->bind(
+            'App\Domain\Interfaces\Services\ElasticSearchServiceInterface',
+            'App\Application\Services\ElasticSearchService'
+        );
+        $this->app->bind(
+            'App\Domain\Interfaces\Services\UserSearchServiceInterface',
+            'App\Application\Services\UserSearchService'
+        );
     }
 
     /**

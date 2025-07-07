@@ -7,6 +7,7 @@ use App\Infrastructure\Models\User;
 use App\Application\DTOs\UserDTO;
 use App\Domain\Entities\User as EntitiesUser;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Collection;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -24,6 +25,11 @@ class EloquentUserRepository implements UserRepositoryInterface
         }
 
         return $this->mapToUser($userData);
+    }
+
+    public function getAll(): Collection
+    {
+        return $this->userModel->all();
     }
 
     public function findByEmail(string $email): ?UserDTO
@@ -77,6 +83,11 @@ class EloquentUserRepository implements UserRepositoryInterface
         $user->save();
 
         return $user->fresh();
+    }
+
+    public function chunkAll(int $count, callable $callback): void
+    {
+        $this->userModel->chunk($count, $callback);
     }
 
     private function mapToUser($data): UserDTO
